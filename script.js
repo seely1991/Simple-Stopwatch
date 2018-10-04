@@ -1,3 +1,9 @@
+/* notes for improvement: 
+-eliminate redundancies in drawClocks()
+-create a more elegant way of setting/checking the state of the stopwatch
+-change name of button functions to match what they actually do (change start, pause, and stop to start/pause, stop, and clear)
+*/
+
 $(document).ready(function () {
 
 const canvas = document.getElementById("canvas")
@@ -18,21 +24,25 @@ let circle = "fill"
 function drawClocks(m,s,ms) {
 	ctx.lineWidth = lineWidth;
 	ctx.beginPath()
+	//circle drawn for hours
 	ctx.arc(canvas.width/4-45,canvas.height/2+8,radius,Math.PI*1.5,(Math.PI*2*(m+((s+ms/100)/60))/60)+Math.PI*1.5)
 	ctx.strokeStyle = circleColor;
 	ctx.stroke();
 	ctx.closePath();
 	ctx.beginPath()
+	//circle drawn for minutes
 	ctx.arc(canvas.width/2,canvas.height/2+8,radius,Math.PI*1.5,(Math.PI*2*(s+(ms/100))/60)+Math.PI*1.5)
 	ctx.strokeStyle = circleColor;
 	ctx.stroke();
 	ctx.closePath();
 	ctx.beginPath();
+	//circle drawn for seconds
 	ctx.arc(canvas.width*3/4+45,canvas.height/2+8,radius,Math.PI*1.5,(Math.PI*2*ms/98)+Math.PI*1.5)
 	ctx.strokeStyle = circleColor;
 	ctx.stroke();
 	ctx.closePath();
 	ctx.beginPath();
+	//circle drawn for milliseconds
 	ctx.lineWidth = littleLineWidth;
 	ctx.arc(canvas.width-60,(canvas.height/2)+110,littleRadius,0,Math.PI*2)
 	ctx.strokeStyle = circleColor;
@@ -65,6 +75,7 @@ function timing() {
 }
 */
 
+//function for starting the stopwatch	
 function timing2() {
 	ctx.beginPath();
 	ctx.clearRect(0,0,1000,400);
@@ -74,30 +85,37 @@ function timing2() {
 }
 	let timeElapsed = Date.now()-dateTime-elapsedPauseTime;
 	function factorOut(raw,denominator) {
+		//function for converting raw time units to multiples of 60 (24 for hours and 100 for miliseconds)
 		return Math.floor(((raw/denominator)-(Math.floor(raw/denominator)))*denominator);
 	}
 	let milis = Math.floor(factorOut(timeElapsed,1000)/10);
+	//variables with 'raw' in the name are in different multiples and get converted using factorOut
 	let rawSecs = timeElapsed/1000;
 	let secs = factorOut(rawSecs,60);
 	let rawMins = timeElapsed/60000;
 	let mins = factorOut(rawMins,60);
 	let rawHours = timeElapsed/3600000;
 	let hours = factorOut(rawHours,24);
+	//updating the index.html with the time values
 	$("#seconds").html(secs);
 	$("#minutes").html(mins);
 	$("#miliseconds").html(milis);
 	$("#hours").html(hours);
 	if (hours === 0) {
+	//displays the time in the title of the page
 	document.title = mins + "m" + secs + "s";
 	}else if (hours > 0) {
+		//how to show the display once the time gets into hours as the title can only fit two numeric values comfortably
 		document.title = hours + "h" + mins + "m";
 	}
 	drawClocks(mins,secs,milis);
 }
 
+//rudimentary way to set the state of the stopwatch
 let start = 1;
 let stop;
 $("#start").on('click', function () {
+	//starting the stopwatch
 	if (start !== true && start !== false) {
 		stop = setInterval(timing2,10)
 		start = true;
@@ -112,6 +130,7 @@ $("#start").on('click', function () {
 	}
 });
 $("#pause").on('click', function () {
+	//stopping the stopwatch (also clears it)
 	clearInterval(stop)
 	pauseDate = 0;
 	elapsedPauseTime = 0;
@@ -127,6 +146,7 @@ $("#pause").on('click', function () {
 	ctx.closePath();
 });
 $("#stop").on('click', function () {
+	//clears stopwatch
 	pauseDate = 0;
 	elapsedPauseTime = 0;
 	dateTime = 0;
@@ -143,10 +163,12 @@ $("#stop").on('click', function () {
 })
 
 $("#menu").on('click', function () {
+	//display the different themes in the themebar
 	$("#themeBar").slideToggle();
 })
 
 function makeTheme(themeArr) {
+	//take an array of 6 colors to make a new theme
 	$("#backgroundA").css("background-color", themeArr[0]);
 	$("#backgroundC").css( "background-color", themeArr[1]);
 	$(".bton").css("background-color", themeArr[2]);
@@ -158,18 +180,22 @@ function makeTheme(themeArr) {
 	$("#inner-circle").css("background-color", themeArr[5]);
 }
 
+//current color themes
 const pinkTheme = ["#F9DCFE","#FCF0F4","#DDE5FE","#B8C8FD","#7993FC","#FEFEFE","#D199D1"]
 const redTheme = ["#EB6140","#DEDAF9","#EF97A2","#9D94FA","#EE8C7C","#EF9889","#EB6140"]
 const yellowTheme = ["#FDFBB0", "#6E79DC", "#F2B173", "#9695FC", "#CFEEFE", "#6E79DC", "#F5C294"]
 
 
 function defaultTheme(themeArr) {
+	//sets which theme will be the default theme when the page opens
 	makeTheme(themeArr);
 }
 
+//current default theme
 defaultTheme(yellowTheme);
 
 $("#circle-button").on('click', function() {
+	//changes whether or not the circles drawn are 'filled' or 'stroked'
 	if (circle == "fill") {
 		radius=100;
 		littleRadius = 30;
@@ -188,6 +214,7 @@ $("#circle-button").on('click', function() {
 	
 })
 
+//alternate theme colors
 $("#theme1").on('click', function () {
 	makeTheme(pinkTheme);
 })
